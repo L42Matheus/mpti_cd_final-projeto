@@ -54,7 +54,6 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 ├── dados/
 │   ├── CID10/tb_cid.txt        # tabela de diagnósticos (CID-10 V2008)
 │   └── SIGTAP/tb_procedimento.txt   # tabela de procedimentos (SIGTAP 05/2026)
-├── artigo/                     # artigo SBC (.tex) e references.bib
 ├── docs/                       # planejamento do projeto
 └── README.md
 ```
