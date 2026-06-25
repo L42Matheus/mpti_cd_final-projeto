@@ -22,9 +22,11 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 |---|---|---|
 | SIGTAP | Procedimentos do SUS (competência **05/2026**) | [sigtap.datasus.gov.br](https://sigtap.datasus.gov.br/) |
 | CID-10 | Diagnósticos — versão V2008 (vigente no SUS até 2027) | [tabnet.datasus.gov.br](https://tabnet.datasus.gov.br/) |
-| DeCS/MeSH | Vocabulário controlado de termos médicos | [decs.bvsalud.org](https://decs.bvsalud.org/) |
+| DeCS/MeSH | Vocabulário controlado de termos médicos *(em espera — ver nota)* | [decs.bvsalud.org](https://decs.bvsalud.org/) |
 
 > Apenas dados **secundários e públicos**. Nenhum dado de paciente.
+
+> **Nota sobre o DeCS.** O planejamento prevê o uso do DeCS/MeSH como vocabulário controlado para identificação de termos técnicos. Foi feita **solicitação formal do XML completo** à BIREME/BVS para evitar consultas termo a termo (inviável dado o volume). Como a liberação ainda não saiu até o fechamento desta entrega, a identificação de jargão médico é feita, **provisoriamente**, por análise morfológica greco-latina (sufixos como *-ite*, *-ectomia*, *-scopia*; radicais como *cardio-*, *gastro-*, *nefro-*), com base em Rezende (2004). Quando o XML do DeCS for liberado, esse atributo será refinado.
 
 ---
 
