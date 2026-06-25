@@ -33,7 +33,7 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 ```
 1. Coleta        → download dos arquivos oficiais (CID-10 e SIGTAP)
 2. Integração    → concat das duas fontes numa só tabela
-3. Limpeza       → remoção de nulos e duplicatas
+3. Limpeza       → nulos + duplicidades semânticas (descrição repetida em códigos distintos)
 4. Atributos     → qtd_palavras, qtd_caracteres, qtd_termos_tecnicos, tem_sigla, tem_abreviacao
 5. Classificação → score ponderado + tercis → baixa / média / alta (heurística)
 6. Análise EDA   → distribuição por fonte, histograma do score, outliers (boxplot)
