@@ -8,7 +8,9 @@
 
 ## Sobre o projeto
 
-Construção de um dataset rotulado que classifica diagnósticos (CID-10) e procedimentos (SIGTAP) do SUS em três níveis de **complexidade técnico-linguística**: baixa, média ou alta.
+Construção de um **dataset exploratório** sobre diagnósticos (CID-10) e procedimentos (SIGTAP) do SUS, com uma **classificação heurística** de **complexidade técnico-linguística** em três níveis (baixa, média ou alta) derivada de atributos do próprio texto.
+
+> **Importante:** este **não é um dataset rotulado** no sentido estrito — não houve anotação por especialistas em saúde ou linguística. A categoria de complexidade é uma **proxy heurística** calculada a partir de características mensuráveis das descrições (tamanho, jargão, siglas etc.). Uma rotulagem real exigiria um painel de especialistas e tempo de validação que vão além do escopo desta disciplina.
 
 O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestrado [Traduz Saúde](https://github.com/L42Matheus), que visa simplificar a linguagem médica para pacientes — mas mantém escopo independente para a disciplina de Ciência de Dados.
 
@@ -33,7 +35,7 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 2. Integração    → concat das duas fontes numa só tabela
 3. Limpeza       → remoção de nulos e duplicatas
 4. Atributos     → qtd_palavras, qtd_caracteres, qtd_termos_tecnicos, tem_sigla, tem_abreviacao
-5. Rotulagem     → score ponderado + tercis → baixa / média / alta
+5. Classificação → score ponderado + tercis → baixa / média / alta (heurística)
 6. Análise EDA   → distribuição por fonte, histograma do score, outliers (boxplot)
 7. Modelagem     → árvore de decisão (max_depth=5) + validação cruzada 5-fold
 ```
@@ -45,7 +47,7 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 ```
 .
 ├── colab_passo_a_passo.ipynb   # notebook principal com todo o pipeline
-├── dataset_final_rotulado.csv  # dataset gerado (saída do notebook)
+├── dataset_final.csv           # dataset exploratório gerado (saída do notebook)
 └── README.md
 ```
 
@@ -87,8 +89,9 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 
 ---
 
-## Limitações assumidas
+## Natureza do dataset e limitações assumidas
 
-- A variável `complexidade` é uma **proxy heurística** de legibilidade, não validada com pacientes reais.
-- A árvore de decisão tem papel **interpretativo** (reaprende a heurística), não preditivo.
-- A versão da CID-10 em português (V2008) está congelada desde 2008, mas continua vigente no SUS (Nota Técnica MS 91/2024).
+- **Dataset exploratório, não rotulado.** A categoria `complexidade` é derivada automaticamente de atributos do texto, não anotada por especialistas. Trata-se de uma **proxy heurística** de legibilidade, não de uma rotulagem validada.
+- **Rotulagem real exigiria especialistas.** Uma classificação confiável de complexidade médica demandaria um painel multidisciplinar (médicos, linguistas, pacientes) e tempo de validação incompatíveis com o escopo da disciplina. Fica como **trabalho futuro**.
+- **A árvore de decisão tem papel interpretativo.** Como o `score` deriva dos próprios atributos, o modelo reaprende a heurística — a alta acurácia mostra consistência interna, não capacidade preditiva sobre rótulos humanos.
+- **CID-10 V2008.** A versão em português está congelada desde 2008, mas continua vigente no SUS (Nota Técnica MS 91/2024).
