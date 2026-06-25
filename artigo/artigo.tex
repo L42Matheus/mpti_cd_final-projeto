@@ -1,0 +1,394 @@
+\documentclass[12pt]{article}
+
+\usepackage{sbc-template}
+\usepackage{graphicx,url}
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian]{babel}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{amsmath}
+
+\sloppy
+
+\title{Construção e Avaliação Preliminar de um \textit{Dataset} para Análise da Complexidade Técnico-Linguística de Descrições do SUS}
+
+\author{Lucas Matheus Santos da Silva\inst{1}, Pedro Ivo Leite\inst{1}}
+
+\address{Programa de Pós-Graduação em Tecnologia da Informação (PPGTI)\\
+  Instituto Federal da Paraíba (IFPB) -- João Pessoa, PB -- Brasil\\
+  \email{lucas.silva@academico.ifpb.edu.br, pedro.leite@academico.ifpb.edu.br}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Official descriptions of diagnoses and procedures in the Brazilian Unified
+Health System (SUS) contain specialized terminology, acronyms and
+abbreviations that may hinder comprehension by non-specialists. This work
+constructs a reproducible dataset for the exploratory analysis of
+technical-linguistic complexity in ICD-10 and SIGTAP descriptions. The corpus
+contains 17{,}182 records: 12{,}198 ICD-10 subcategories and 4{,}984 SIGTAP
+procedures. We describe two pipeline variants: an \emph{executed} variant that
+identifies medical jargon through Greek-Latin morphological signals, and a
+\emph{proposed} variant that replaces the jargon proxy with DeCS-based
+terminology matching once the licensed XML is released. Complexity bands are
+interpreted as heuristic until compared with human judgments. Preliminary
+descriptive analysis shows that source-level differences cannot be reduced to
+text length alone.
+\end{abstract}
+
+\begin{resumo}
+Descrições oficiais de diagnósticos e procedimentos do Sistema Único de Saúde
+(SUS) contêm terminologia especializada, siglas e abreviações que podem
+dificultar a compreensão por pessoas não especialistas. Este trabalho constrói
+um \textit{dataset} reproduzível para análise exploratória da complexidade
+técnico-linguística de descrições da CID-10 e do SIGTAP. O corpus possui
+17.182 registros: 12.198 subcategorias CID-10 e 4.984 procedimentos SIGTAP.
+Descrevemos duas variantes do \textit{pipeline}: uma \emph{executada}, que
+identifica jargão médico por sinais morfológicos greco-latinos, e uma
+\emph{proposta}, que substitui o \textit{proxy} de jargão por correspondência
+terminológica com o DeCS quando o XML licenciado for liberado. As faixas de
+complexidade são interpretadas como heurísticas até serem comparadas com
+julgamentos humanos. A análise descritiva preliminar mostra que diferenças
+entre fontes não podem ser reduzidas apenas ao comprimento do texto.
+\end{resumo}
+
+\section{Introdução}
+
+A comunicação em saúde é fator determinante para a adesão a tratamentos e para
+a segurança do paciente, e é reconhecidamente influenciada pela
+\textit{health literacy} do indivíduo~\cite{nutbeam2008,sorensen2012}.
+Diagnósticos e procedimentos do Sistema Único de Saúde (SUS) são registrados
+em linguagem altamente técnica, com termos de origem greco-latina, siglas e
+abreviações próprias da área médica. Para quem não é especialista ---
+pacientes, estudantes e até profissionais de outras áreas da saúde ---
+essa linguagem pode constituir uma barreira de compreensão. Revisões em
+comunicação em saúde apontam que jargão e abreviações podem prejudicar a
+interpretação de instruções por leitores não especialistas~\cite{maghroudi2021}.
+
+Bases públicas do SUS, como a CID-10 e o SIGTAP, mantêm as descrições oficiais
+desses diagnósticos e procedimentos. Apesar de amplamente utilizadas para fins
+administrativos, essas descrições raramente são analisadas sob a ótica da
+\textit{legibilidade}: o quão difícil é, para um leitor não especialista,
+compreender aquele texto.
+
+\textbf{Problema.} Este trabalho ataca o seguinte problema de Ciência de
+Dados: \textit{construir um dataset que classifique, de modo heurístico,
+diagnósticos e procedimentos médicos do SUS em níveis de complexidade
+técnico-linguística --- baixa, média ou alta --- e identificar quais
+atributos do texto mais influenciam essa classificação}. Trata-se de um
+\textit{dataset} exploratório: a categoria é uma \textit{proxy} heurística,
+não uma rotulagem validada por especialistas.
+
+\textbf{Contribuições.} As principais contribuições são:
+(i)~uma base, em português, construída a partir das tabelas oficiais do SUS;
+(ii)~um \textit{pipeline} reproduzível de construção, enriquecimento e
+formação de faixas heurísticas, descrito em duas variantes (executada e
+proposta com DeCS); (iii)~uma análise descritiva inicial dos atributos por
+fonte; e (iv)~um protocolo de validação com anotação humana.
+
+Como \textit{recorte}, a variável de complexidade é criada por regras
+heurísticas; assim, os resultados devem ser interpretados como uma análise
+exploratória da complexidade textual, e não como medida definitiva da
+compreensão real por parte dos pacientes.
+
+Neste estudo, \textit{complexidade técnico-linguística} é uma definição
+operacional baseada em terminologia de saúde, extensão, siglas, abreviações e
+sinais morfológicos especializados. Ela não equivale à legibilidade em sentido
+amplo, que também depende de sintaxe, contexto, apresentação e características
+do leitor. As perguntas de pesquisa são: \textbf{QP1}: quais atributos
+caracterizam descritivamente CID-10 e SIGTAP? \textbf{QP2}: como a terminologia
+identificada pelo DeCS contribui para faixas exploratórias de complexidade?
+\textbf{QP3}: qual é a concordância entre a regra heurística e uma amostra
+estratificada anotada por humanos? Nesta entrega, \textbf{QP1} é parcialmente
+respondida pelas estatísticas descritivas (Seção~\ref{sec:descritivos}); \textbf{QP2}
+depende da liberação do XML do DeCS e \textbf{QP3} depende da rodada de anotação,
+ambas tratadas como trabalho imediato.
+
+\section{Trabalhos Relacionados}
+
+A medição automática da dificuldade de leitura remonta às
+\textit{fórmulas de legibilidade}. O índice de Flesch~\cite{flesch1948}
+estima a legibilidade a partir do tamanho médio de frases e de palavras, e
+foi adaptado ao português brasileiro por Martins et al.~\cite{martins1996},
+com pesos próprios devido às diferenças entre os idiomas. A
+fórmula de Dale-Chall~\cite{dalechall1948,chall1995} introduziu a noção
+de \textit{palavras difíceis} --- aquelas fora de uma lista de palavras
+familiares --- combinada ao tamanho das frases por meio de coeficientes
+ponderados. Para o português, o Coh-Metrix-Port~\cite{scarton2010cohmetrix}
+e, mais recentemente, o NILC-Metrix~\cite{leal2024nilcmetrix} reúnem dezenas
+de métricas de complexidade textual, incluindo medidas lexicais, sintáticas e
+de coesão. Trabalhos como o PorSimples~\cite{aluisio2010porsimples} aplicam
+esses recursos a tarefas de simplificação textual em pt-BR.
+
+No domínio médico, Zheng e Yu~\cite{zheng2017} mostraram empiricamente que
+fórmulas clássicas de legibilidade subestimam a dificuldade percebida em
+registros eletrônicos de saúde, sugerindo que o domínio exige métricas
+específicas. O MedReadMe~\cite{jiang2024medreadme} avaliou centenas de
+atributos e concluiu que a contagem de \textit{jargão} é o fator que mais
+contribui para a dificuldade de textos médicos --- resultado que fundamenta
+a priorização de termos técnicos neste trabalho. O estudo é inspiração
+metodológica, não fórmula diretamente transferível: ele analisa sentenças em
+inglês, enquanto este trabalho analisa descrições terminológicas em
+português.
+
+\textbf{Lacuna.} A literatura de legibilidade médica concentra-se no inglês e
+em textos corridos. Não encontramos trabalho equivalente que classifique a
+complexidade linguística das \textit{tabelas oficiais do SUS} em português.
+É essa lacuna que o presente trabalho aborda.
+
+\section{Metodologia}
+
+O \textit{pipeline} de construção do \textit{dataset} segue seis etapas:
+coleta, integração, limpeza, extração de atributos, classificação heurística
+e análise. Foram utilizados exclusivamente dados públicos e secundários;
+nenhum dado pessoal de paciente.
+
+\paragraph{Variantes do pipeline.} Apresentamos duas variantes da etapa de
+classificação: (i)~a \textbf{executada} (Seção~\ref{sec:score-exec}), em que
+o \textit{proxy} de jargão é a contagem de sinais morfológicos greco-latinos;
+e (ii)~a \textbf{proposta} (Seção~\ref{sec:score-prop}), em que o
+\textit{proxy} é a quantidade de expressões encontradas no DeCS. Os
+resultados reportados na Seção~\ref{sec:resultados} correspondem à variante
+executada. A variante com DeCS está em espera porque o XML completo foi
+solicitado à BIREME/BVS, mas ainda não foi liberado até o fechamento desta
+entrega; a consulta termo a termo é inviável para 17.182 registros.
+
+\subsection{Fontes de dados}
+
+Utilizamos duas tabelas oficiais do DATASUS, descritas na
+Tabela~\ref{tab:fontes}. O relacionamento entre elas não é explorado aqui:
+CID-10 e SIGTAP são tratados como duas fontes de \textit{texto}
+independentes, pois o objetivo é medir a linguagem.
+
+\begin{table}[ht]
+\centering
+\caption{Fontes de dados utilizadas (DATASUS).}
+\label{tab:fontes}
+\begin{tabular}{lll}
+\toprule
+\textbf{Fonte} & \textbf{Conteúdo} & \textbf{Registros} \\
+\midrule
+CID-10 (V2008)         & diagnósticos (código + nome) & 12.198 \\
+SIGTAP (comp. 05/2026) & procedimentos (código + nome) & 4.984 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Coleta, integração e limpeza}
+
+A CID-10~\cite{datasus_cid10} e o SIGTAP~\cite{datasus_sigtap} foram obtidos
+em arquivos de \textit{largura fixa} (sem separador), lidos por posição
+conforme seus respectivos \textit{lay-outs}. As duas fontes foram
+concatenadas em uma única tabela, preservando a origem de cada registro.
+A limpeza tratou valores ausentes e duplicidades. A detecção de duplicidades
+é feita por \textbf{descrição}, e não pela combinação \texttt{(codigo,
+descricao)}: como os códigos da CID-10 e do SIGTAP são únicos por
+construção, a verificação combinada sempre devolveria zero; o que importa
+para o nosso objetivo --- medir linguagem --- é a repetição da descrição.
+Após a limpeza, o \textit{dataset} contém \textbf{17.182 registros}.
+
+\subsection{Extração de atributos}
+
+Para cada descrição são derivados seis atributos textuais:
+\texttt{qtd\_palavras}, \texttt{qtd\_caracteres}, \texttt{qtd\_palavras\_longas}
+(palavras com $\geq 12$ caracteres), \texttt{qtd\_sinais\_morfologicos},
+\texttt{tem\_sigla} e \texttt{tem\_abreviacao}. Os atributos
+\texttt{qtd\_palavras\_longas} e \texttt{qtd\_sinais\_morfologicos} são
+mantidos \emph{separadamente} para evitar confundir tamanho com jargão:
+``tratamento'' é uma palavra longa de uso comum, enquanto ``gastrite''
+é curta, mas carrega um sinal morfológico médico explícito.
+
+\paragraph{Sinais morfológicos.} Adotamos uma lista de morfemas
+greco-latinos típicos da linguagem médica~\cite{rezende2004} (por exemplo,
+\textit{-ite}, \textit{-ectomia}, \textit{-scopia}, \textit{cardio-},
+\textit{nefro-}). Uma palavra é contada como sinal morfológico se contiver
+ao menos um desses morfemas e não estiver em uma lista de palavras
+funcionais comuns.
+
+\paragraph{Detecção de siglas.} A detecção de siglas usa um
+\emph{vocabulário explícito e auditável} de siglas comuns no SUS (SUS, AIDS,
+DPOC, AVC, IAM, ECG, UTI etc.), em vez de uma expressão regular sobre
+palavras em caixa alta. O SIGTAP é distribuído majoritariamente em
+\textsc{caixa alta}; uma regex baseada apenas em maiúsculas confundiria
+palavras comuns com siglas.
+
+\subsection{Correspondência com o DeCS (variante proposta)}
+\label{sec:decs}
+
+O atributo principal da variante proposta é \texttt{qtd\_termos\_decs}: a
+quantidade de termos ou expressões completas encontrados no vocabulário
+controlado DeCS~\cite{decs}. O DeCS é usado como tabela de consulta; suas
+entradas não são adicionadas como novas linhas ao \textit{dataset}. A busca
+normaliza as descrições e prioriza a expressão mais longa encontrada,
+evitando contar ao mesmo tempo uma expressão e seus componentes. Esta
+variante depende da liberação do XML completo pela BIREME/BVS.
+
+\subsection{Escore e faixas exploratórias}
+
+\subsubsection{Variante executada}
+\label{sec:score-exec}
+
+Os atributos numéricos são normalizados para o intervalo $[0,1]$ e
+combinados conforme a Equação~\ref{eq:score-exec}:
+\begin{equation}
+\label{eq:score-exec}
+\textit{score} = 0{,}40\,M + 0{,}20\,P + 0{,}15\,P_L + 0{,}10\,C +
+0{,}10\,S + 0{,}05\,A,
+\end{equation}
+
+\noindent onde $M$ é \texttt{qtd\_sinais\_morfologicos}, $P$ é
+\texttt{qtd\_palavras}, $P_L$ é \texttt{qtd\_palavras\_longas}, $C$ é
+\texttt{qtd\_caracteres}, $S$ é \texttt{tem\_sigla} e $A$ é
+\texttt{tem\_abreviacao}. A maior ponderação de $M$ é uma hipótese
+operacional motivada por evidências de que jargão melhora a explicação da
+dificuldade em textos médicos~\cite{jiang2024medreadme}.
+
+\subsubsection{Variante proposta (com DeCS)}
+\label{sec:score-prop}
+
+Quando o XML do DeCS for liberado, o \textit{proxy} de jargão $M$ é
+substituído por $T_{DeCS}$ (Eq.~\ref{eq:score-prop}), assumindo a maior
+ponderação:
+\begin{equation}
+\label{eq:score-prop}
+\textit{score} = 0{,}50\,T_{DeCS} + 0{,}15\,M + 0{,}20\,P +
+0{,}10\,S + 0{,}05\,A.
+\end{equation}
+
+Em ambas as variantes, os pesos exatos não são tratados como escala
+validada. O escore contínuo é dividido em tercis para formar faixas
+exploratórias baixa, média e alta. Como esse procedimento equilibra as
+classes por construção, ele não mede a prevalência natural de complexidade
+e não substitui rótulos humanos.
+
+\subsection{Validação por anotação humana}
+\label{sec:validacao}
+
+Será exportada uma amostra estratificada de 150 descrições, sendo 75 de cada
+fonte e distribuídas pelas três faixas exploratórias (25 por faixa por fonte).
+O tamanho foi escolhido para equilibrar viabilidade da rodada com sensibilidade
+adequada para estimar kappa de classes ordinais; uma rodada-piloto de 20 itens
+definirá o guia de anotação. A amostra não recebe o escore previamente, para
+evitar viés de ancoragem. Dois avaliadores leigos --- representando o público
+de referência, adultos brasileiros sem formação em saúde --- rotularão
+independentemente cada descrição. A concordância será medida pelo
+kappa ponderado de Cohen, adequado a classes ordinais, e interpretada pelos
+patamares de Landis e Koch~\cite{landis1977}. O consenso humano será então
+comparado às faixas heurísticas.
+
+\section{Resultados}
+\label{sec:resultados}
+
+\subsection{Qualidade e composição da base}
+
+O \textit{dataset} contém 17.182 registros: 12.198 (71{,}0\%) da CID-10 e
+4.984 (29{,}0\%) do SIGTAP. Não foram identificados códigos vazios nem
+descrições vazias. Há descrições idênticas com códigos diferentes,
+sobretudo no SIGTAP (formas organizacionais distintas para o mesmo
+procedimento); para esta entrega, a duplicidade semântica por descrição é
+explicitamente mensurada e tratada. Em uma futura modelagem supervisionada,
+descrições idênticas deverão permanecer no mesmo grupo de treino ou teste
+para evitar vazamento de informação.
+
+\subsection{Estatísticas descritivas preliminares}
+\label{sec:descritivos}
+
+A Tabela~\ref{tab:descritivos} apresenta atributos calculados na variante
+executada do \textit{pipeline}. A CID-10 apresenta maior extensão média, em
+palavras e caracteres. O SIGTAP apresenta, em média, mais palavras longas e
+sinais morfológicos médicos.
+
+\begin{table}[ht]
+\centering
+\caption{Estatísticas descritivas dos atributos textuais por fonte.}
+\label{tab:descritivos}
+\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{2}{c}{Palavras} & \multicolumn{2}{c}{Caracteres} &
+Palavras longas & Sinais morfológicos \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-6}\cmidrule(lr){7-7}
+Fonte & Média & Mediana & Média & Mediana & Média & Média \\
+\midrule
+CID-10 & 7,66 & 7,00 & 53,47 & 51,00 & 0,59 & 0,24 \\
+SIGTAP & 6,75 & 6,00 & 49,43 & 45,50 & 0,66 & 0,31 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Esses resultados impedem uma conclusão simplista de que procedimentos são
+automaticamente mais complexos por serem procedimentos. A CID-10 possui maior
+extensão média; o SIGTAP possui valores ligeiramente maiores em dois sinais
+auxiliares de especialização. Somente a correspondência com o DeCS e a
+validação humana permitirão discutir complexidade técnico-linguística de
+forma mais fundamentada.
+
+A maior descrição SIGTAP possui 249 caracteres e 40 palavras, enquanto a
+maior descrição CID-10 possui 100 caracteres e 21 palavras. Isso sugere
+maior heterogeneidade de extensão no SIGTAP, mas máximos não substituem
+análise do conjunto.
+
+\subsection{Resultados dependentes do DeCS e da anotação humana}
+
+Após o recebimento da versão licenciada do DeCS, esta subseção deverá
+incluir: percentual de descrições com pelo menos uma expressão encontrada;
+distribuição de \texttt{qtd\_termos\_decs}; termos mais frequentes;
+distribuição do escore; e distribuição das faixas por fonte. Após a anotação
+humana, devem ser reportados kappa ponderado, concordância simples e matriz
+de confusão entre o consenso humano e a faixa heurística.
+
+Uma árvore de decisão pode ser utilizada para visualizar quais atributos
+reproduzem a regra. Entretanto, não se deve interpretá-la como classificador
+preditivo enquanto o alvo for produzido pelos mesmos atributos utilizados
+como entrada.
+
+\section{Discussão e Limitações}
+
+O \textit{dataset} construído permite caracterizar, de forma reproduzível,
+atributos associados à complexidade técnico-linguística das descrições do
+SUS. Reconhecemos limitações: (i)~a complexidade é uma \textit{proxy}
+heurística, não uma medida direta de compreensão por pacientes;
+(ii)~a presença no DeCS indica terminologia de saúde, mas não garante
+dificuldade para todo leitor; (iii)~o alvo deriva dos atributos, o que torna
+uma árvore apenas interpretativa; e (iv)~o equilíbrio entre classes é por
+construção dos tercis.
+
+\textbf{Dificuldades enfrentadas.} A construção exigiu superar obstáculos
+práticos: a instabilidade dos portais do DATASUS; a descontinuação do
+suporte a FTP nos navegadores modernos (contornada via Explorador de
+Arquivos); o formato de largura fixa do SIGTAP; a atualização mensal por
+competência; e a tradução oficial da CID-10 congelada em 2008, porém
+vigente até 2027 (Nota Técnica MS 91/2024). A integração do DeCS, originalmente
+prevista para esta entrega, foi adiada devido ao tempo de processamento da
+solicitação do XML completo à BIREME/BVS.
+
+\section{Reprodutibilidade e Ameaças à Validade}
+
+A execução final registrará versões das fontes, competência do SIGTAP, edição
+do DeCS, critérios de limpeza, lista de siglas, pesos do escore e semente da
+amostragem. A validade de construto é limitada porque presença no DeCS não
+prova dificuldade para todo leitor. A validade externa restringe-se ao
+português brasileiro, às versões analisadas e a descrições administrativas
+isoladas. A validação humana proposta reduz, mas não elimina, essas
+limitações.
+
+\section{Considerações Finais}
+
+Este trabalho construiu uma base de descrições e um \textit{pipeline}
+reproduzível para análise exploratória da complexidade técnico-linguística
+de diagnósticos e procedimentos do SUS, com duas variantes explícitas:
+uma executada (com proxy morfológico) e uma proposta (com DeCS). Os
+resultados descritivos mostram que as diferenças entre CID-10 e SIGTAP não
+podem ser resumidas apenas pela extensão textual. Como trabalhos futuros,
+pretende-se: executar a correspondência com o DeCS assim que o XML for
+liberado e validar as faixas com múltiplos anotadores; comparar a
+complexidade linguística com a complexidade assistencial do SIGTAP; e
+integrar o classificador a uma ferramenta de simplificação de linguagem
+médica.
+
+\bibliographystyle{sbc}
+\bibliography{references}
+
+\end{document}
