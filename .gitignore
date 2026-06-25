@@ -1,0 +1,21 @@
+# Arquivos de dados brutos (não versionar — baixar das fontes oficiais)
+tb_procedimento.txt
+tb_cid.txt
+*.zip
+*.txt
+
+# Outputs locais do Colab
+*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Sistema
+.DS_Store
+Thumbs.db
