@@ -1,5 +1,7 @@
 # Complexidade Técnico-Linguística de Termos Médicos do SUS
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/L42Matheus/mpti_cd_final-projeto/blob/main/colab_passo_a_passo.ipynb)
+
 **Disciplina:** Ciência de Dados — IFPB/PPGTI — 2026.1  
 **Docentes:** Damires Souza e Alex Cunha  
 **Equipe:** Lucas Matheus Santos da Silva · Pedro Ivo
@@ -49,7 +51,11 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 ```
 .
 ├── colab_passo_a_passo.ipynb   # notebook principal com todo o pipeline
-├── dataset_final.csv           # dataset exploratório gerado (saída do notebook)
+├── dados/
+│   ├── CID10/tb_cid.txt        # tabela de diagnósticos (CID-10 V2008)
+│   └── SIGTAP/tb_procedimento.txt   # tabela de procedimentos (SIGTAP 05/2026)
+├── artigo/                     # artigo SBC (.tex) e references.bib
+├── docs/                       # planejamento do projeto
 └── README.md
 ```
 
@@ -57,13 +63,12 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 
 ## Como reproduzir
 
-1. Abra o notebook no Google Colab
-2. Faça upload dos arquivos de dados:
-   - `tb_procedimento.txt` — extraído do ZIP do SIGTAP competência 05/2026
-   - `tb_cid.txt` — disponível no mesmo pacote SIGTAP
-3. Execute as células em ordem
+1. Clique no badge **Open in Colab** no topo deste README
+2. Execute as células em ordem
 
-> **Atenção:** o SIGTAP é atualizado mensalmente. Para reproduzir exatamente os resultados deste trabalho, use a competência **05/2026**.
+Os arquivos `tb_cid.txt` e `tb_procedimento.txt` ficam versionados em `dados/CID10/` e `dados/SIGTAP/`. O notebook lê direto do raw do GitHub — **não é preciso fazer upload manual**.
+
+> **Atenção:** o SIGTAP é atualizado mensalmente. Para reproduzir exatamente os resultados deste trabalho, use a competência **05/2026** (a versão fixada no repositório).
 
 ---
 

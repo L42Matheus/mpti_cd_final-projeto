@@ -1,8 +1,6 @@
-# Arquivos de dados brutos (não versionar — baixar das fontes oficiais)
-tb_procedimento.txt
-tb_cid.txt
+# Arquivos pesados de distribuição (não versionar)
 *.zip
-*.txt
+TabelaUnificada_*/
 
 # Outputs locais do Colab
 *.csv
