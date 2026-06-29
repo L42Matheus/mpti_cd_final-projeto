@@ -6,6 +6,8 @@
 **Docentes:** Damires Souza e Alex Cunha  
 **Equipe:** Lucas Matheus Santos da Silva · Pedro Ivo
 
+📄 **Artigo (Overleaf):** [editar projeto](https://www.overleaf.com/project/6a32dec9264398e4b5715d92)
+
 ---
 
 ## Sobre o projeto
