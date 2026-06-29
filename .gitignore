@@ -2,8 +2,9 @@
 *.zip
 TabelaUnificada_*/
 
-# Outputs locais do Colab
+# Outputs locais do Colab — versionamos só o dataset final
 *.csv
+!dataset_final.csv
 
 # Python
 __pycache__/

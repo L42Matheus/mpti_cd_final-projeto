@@ -53,6 +53,7 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 ```
 .
 ├── colab_passo_a_passo.ipynb   # notebook principal com todo o pipeline
+├── dataset_final.csv           # ⭐ dataset exploratório gerado (17.161 registros, 12 colunas)
 ├── dados/
 │   ├── CID10/tb_cid.txt        # tabela de diagnósticos (CID-10 V2008)
 │   ├── SIGTAP/tb_procedimento.txt   # tabela de procedimentos (SIGTAP 05/2026)
