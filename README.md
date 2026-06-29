@@ -55,7 +55,8 @@ O projeto segue a metodologia **CRISP-DM** e está relacionado ao tema de mestra
 ├── colab_passo_a_passo.ipynb   # notebook principal com todo o pipeline
 ├── dados/
 │   ├── CID10/tb_cid.txt        # tabela de diagnósticos (CID-10 V2008)
-│   └── SIGTAP/tb_procedimento.txt   # tabela de procedimentos (SIGTAP 05/2026)
+│   ├── SIGTAP/tb_procedimento.txt   # tabela de procedimentos (SIGTAP 05/2026)
+│   └── DeCS/decs_termos_pt.txt # vocabulário DeCS em português (BIREME/BVS)
 ├── docs/                       # planejamento do projeto
 └── README.md
 ```
