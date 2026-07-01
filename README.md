@@ -10,7 +10,7 @@
 
 ---
 
-## Sobre o projeto
+## Sobre o projeto.
 
 Construção de um **dataset exploratório** sobre diagnósticos (CID-10) e procedimentos (SIGTAP) do SUS, com uma **classificação heurística** de **complexidade técnico-linguística** em três níveis (baixa, média ou alta) derivada de atributos do próprio texto.
 
